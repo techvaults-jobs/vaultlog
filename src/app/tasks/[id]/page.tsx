@@ -94,6 +94,7 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
     if (session && id) {
       void fetchTask();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, id]);
 
   const handleTimeLogSubmit = async (e: React.FormEvent) => {

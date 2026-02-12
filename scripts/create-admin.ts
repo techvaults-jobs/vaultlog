@@ -28,7 +28,7 @@ async function createAdmin() {
     const hashedPassword = await bcrypt.hash("95R(nR1'>eA~\"4-9m8\\s£1\"lUfy/Vq)0Ge@W", 10);
 
     // Create admin user
-    const adminUser = await db.insert(users).values({
+    await db.insert(users).values({
       email: "techvaults@gmail.com",
       name: "Admin",
       password: hashedPassword,
