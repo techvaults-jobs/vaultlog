@@ -93,72 +93,74 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex min-h-screen app-shell">
       <Sidebar />
       <div className="flex-1 flex flex-col md:ml-64 pt-16">
         <Navbar />
         <main className="flex-1 overflow-auto">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
-              <p className="text-gray-600 mt-2">View client performance and billing reports</p>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+            <div className="page-header">
+              <div>
+                <h1 className="page-title">Reports</h1>
+                <p className="page-subtitle">View client performance and billing reports</p>
+              </div>
             </div>
 
             {/* Reports Table */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h2 className="text-lg font-semibold text-gray-900">Client Reports</h2>
+            <div className="panel overflow-hidden">
+              <div className="panel-header">
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Client Reports</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead>
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
                         Client
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
                         Total Tasks
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
                         Completed
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
                         Completion Rate
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
                         Total Hours
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-[var(--border-light)]">
                     {reports.map((report, idx) => {
                       const completionRate =
                         report.totalTasks > 0
                           ? ((report.completedTasks / report.totalTasks) * 100).toFixed(1)
                           : 0;
                       return (
-                        <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                        <tr key={idx} className="hover:bg-[var(--surface-secondary)] transition-colors">
+                          <td className="px-6 py-4 text-sm font-semibold text-[var(--text-primary)]">
                             {report.clientName}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-700">
+                          <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
                             {report.totalTasks}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-700">
+                          <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
                             {report.completedTasks}
                           </td>
                           <td className="px-6 py-4 text-sm">
                             <div className="flex items-center gap-2">
-                              <div className="w-16 bg-gray-200 rounded-full h-2">
+                              <div className="w-20 bg-[var(--surface-tertiary)] rounded-full h-2">
                                 <div
-                                  className="bg-red-600 h-2 rounded-full"
+                                  className="bg-[var(--primary)] h-2 rounded-full"
                                   style={{ width: `${completionRate}%` }}
                                 ></div>
                               </div>
-                              <span className="text-gray-700 font-medium">{completionRate}%</span>
+                              <span className="text-[var(--text-secondary)] font-medium">{completionRate}%</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-700">
+                          <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
                             {report.totalHours.toFixed(1)}h
                           </td>
                         </tr>
@@ -168,8 +170,8 @@ export default function ReportsPage() {
                 </table>
               </div>
               {reports.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-gray-600">No report data available</p>
+                <div className="empty-state">
+                  <p>No report data available</p>
                 </div>
               )}
             </div>

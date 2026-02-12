@@ -117,35 +117,37 @@ export default function NewTaskPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex min-h-screen app-shell">
       <Sidebar />
       <div className="flex-1 flex flex-col md:ml-64 pt-16">
         <Navbar />
         <main className="flex-1 overflow-auto">
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Create New Task</h1>
-              <p className="text-gray-600 mt-2">Add a new service task to the system</p>
+          <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+            <div className="page-header">
+              <div>
+                <h1 className="page-title">Create New Task</h1>
+                <p className="page-subtitle">Add a new service task to the system</p>
+              </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
+            <div className="panel panel-body">
               <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg font-medium">
+                  <div className="bg-[var(--error-light)] border border-[var(--error)] text-[var(--error)] px-4 py-3 rounded-lg font-medium">
                     {error}
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Client <span className="text-red-600">*</span>
+                  <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                    Client <span className="text-[var(--primary)]">*</span>
                   </label>
                   <select
                     name="clientId"
                     value={formData.clientId}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
+                    className="w-full"
                   >
                     <option value="">Select a client</option>
                     {clients.map((client) => (
@@ -157,8 +159,8 @@ export default function NewTaskPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Title <span className="text-red-600">*</span>
+                  <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                    Title <span className="text-[var(--primary)]">*</span>
                   </label>
                   <input
                     type="text"
@@ -167,12 +169,12 @@ export default function NewTaskPage() {
                     onChange={handleChange}
                     required
                     placeholder="Enter task title"
-                    className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent placeholder-gray-500 transition-all"
+                    className="w-full"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                     Description
                   </label>
                   <textarea
@@ -181,14 +183,14 @@ export default function NewTaskPage() {
                     onChange={handleChange}
                     rows={4}
                     placeholder="Enter task description"
-                    className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent placeholder-gray-500 transition-all resize-none"
+                    className="w-full resize-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Category <span className="text-red-600">*</span>
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                      Category <span className="text-[var(--primary)]">*</span>
                     </label>
                     <input
                       type="text"
@@ -197,19 +199,19 @@ export default function NewTaskPage() {
                       onChange={handleChange}
                       required
                       placeholder="e.g., Development"
-                      className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent placeholder-gray-500 transition-all"
+                      className="w-full"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                       Priority
                     </label>
                     <select
                       name="priority"
                       value={formData.priority}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
+                      className="w-full"
                     >
                       <option value="LOW">Low</option>
                       <option value="MEDIUM">Medium</option>
@@ -220,14 +222,14 @@ export default function NewTaskPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                     Assign To
                   </label>
                   <select
                     name="assignedToId"
                     value={formData.assignedToId}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
+                    className="w-full"
                   >
                     <option value="">Unassigned</option>
                     {users.map((user) => (
@@ -242,14 +244,14 @@ export default function NewTaskPage() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    className="btn btn-primary flex-1"
                   >
                     {submitting ? "Creating..." : "Create Task"}
                   </button>
                   <button
                     type="button"
                     onClick={() => router.back()}
-                    className="flex-1 bg-white text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 border border-gray-300 transition-all"
+                    className="btn btn-secondary flex-1"
                   >
                     Cancel
                   </button>

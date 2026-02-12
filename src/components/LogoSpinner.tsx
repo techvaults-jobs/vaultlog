@@ -12,10 +12,10 @@ export function LogoSpinner({
   return (
     <div className="flex items-center gap-3">
       <div
-        className="relative rounded-full bg-red-50 shadow-sm"
+        className="relative rounded-full bg-[var(--primary-light)] shadow-sm"
         style={{ width: size, height: size }}
       >
-        <div className="absolute inset-0 rounded-full ring-2 ring-red-100"></div>
+        <div className="absolute inset-0 rounded-full ring-2 ring-[var(--primary-light)]"></div>
         <Image
           src="/logo-sm.png"
           alt="VaultLog"
@@ -25,7 +25,7 @@ export function LogoSpinner({
           priority
         />
       </div>
-      <span className="text-sm font-semibold text-gray-600">{label}</span>
+      <span className="text-sm font-semibold text-[var(--text-tertiary)]">{label}</span>
     </div>
   );
 }

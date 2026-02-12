@@ -161,12 +161,12 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
 
   if (!task) {
     return (
-      <div className="flex h-screen bg-gray-50">
+      <div className="flex min-h-screen app-shell">
         <Sidebar />
         <div className="flex-1 flex flex-col md:ml-64 pt-16">
           <Navbar />
           <main className="flex-1 flex items-center justify-center">
-            <p className="text-gray-600">Task not found</p>
+            <p className="text-[var(--text-secondary)]">Task not found</p>
           </main>
         </div>
       </div>
@@ -176,68 +176,127 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
   const totalHours = task.timeLogs.reduce((sum, log) => sum + parseFloat(log.duration), 0);
   const canEdit = ["ADMIN", "MANAGER"].includes(session?.user?.role || "");
 
+  const statusBadge = (status: string) => {
+    switch (status) {
+      case "COMPLETED":
+        return "badge-success";
+      case "IN_PROGRESS":
+        return "badge-info";
+      case "BLOCKED":
+        return "badge-error";
+      default:
+        return "badge-neutral";
+    }
+  };
+
+  const priorityBadge = (priority: string) => {
+    switch (priority) {
+      case "URGENT":
+        return "badge-error";
+      case "HIGH":
+        return "badge-warning";
+      case "MEDIUM":
+        return "badge-info";
+      default:
+        return "badge-neutral";
+    }
+  };
+
+  const activityTypeConfig: Record<
+    string,
+    {
+      label: string;
+      badge: string;
+      dot: string;
+      border: string;
+    }
+  > = {
+    TASK_CREATED: {
+      label: "Task created",
+      badge: "badge badge-success",
+      dot: "bg-[var(--success)]",
+      border: "border-[var(--border-light)]",
+    },
+    STATUS_CHANGED: {
+      label: "Status changed",
+      badge: "badge badge-info",
+      dot: "bg-[var(--info)]",
+      border: "border-[var(--border-light)]",
+    },
+    TASK_UPDATED: {
+      label: "Task updated",
+      badge: "badge badge-warning",
+      dot: "bg-[var(--warning)]",
+      border: "border-[var(--border-light)]",
+    },
+    TASK_ASSIGNED: {
+      label: "Task assigned",
+      badge: "badge badge-neutral",
+      dot: "bg-[var(--text-muted)]",
+      border: "border-[var(--border-light)]",
+    },
+    TIME_LOGGED: {
+      label: "Time logged",
+      badge: "badge badge-success",
+      dot: "bg-[var(--success)]",
+      border: "border-[var(--border-light)]",
+    },
+  };
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex min-h-screen app-shell">
       <Sidebar />
       <div className="flex-1 flex flex-col md:ml-64 pt-16">
         <Navbar />
         <main className="flex-1 overflow-auto">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
             {error && (
-              <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg font-medium">
+              <div className="mb-6 bg-[var(--error-light)] border border-[var(--error)] text-[var(--error)] px-4 py-3 rounded-lg font-medium">
                 {error}
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
               {/* Task Info */}
-              <div className="col-span-2 bg-white rounded-lg border border-gray-200 shadow-sm p-8">
+              <div className="col-span-3 lg:col-span-2 panel panel-body">
                 <div className="flex justify-between items-start mb-6">
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900">{task.title}</h1>
-                    <p className="text-gray-600 mt-2">{task.description}</p>
+                    <h1 className="page-title">{task.title}</h1>
+                    <p className="page-subtitle">{task.description}</p>
                   </div>
                   <span
-                    className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${
-                      task.status === "COMPLETED"
-                        ? "bg-green-100 text-green-700 border border-green-300"
-                        : task.status === "IN_PROGRESS"
-                        ? "bg-blue-100 text-blue-700 border border-blue-300"
-                        : task.status === "BLOCKED"
-                        ? "bg-red-100 text-red-700 border border-red-300"
-                        : "bg-gray-100 text-gray-700 border border-gray-300"
-                    }`}
+                    className={`badge ${statusBadge(task.status)} whitespace-nowrap`}
                   >
                     {task.status}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 py-6 border-t border-b border-gray-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-6 border-t border-b border-[var(--border-light)]">
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Client</p>
-                    <p className="font-semibold text-gray-900 mt-1">{task.client.name}</p>
+                    <p className="text-sm text-[var(--text-tertiary)] font-medium">Client</p>
+                    <p className="font-semibold text-[var(--text-primary)] mt-1">{task.client.name}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Category</p>
-                    <p className="font-semibold text-gray-900 mt-1">{task.category}</p>
+                    <p className="text-sm text-[var(--text-tertiary)] font-medium">Category</p>
+                    <p className="font-semibold text-[var(--text-primary)] mt-1">{task.category}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Assigned To</p>
-                    <p className="font-semibold text-gray-900 mt-1">
+                    <p className="text-sm text-[var(--text-tertiary)] font-medium">Assigned To</p>
+                    <p className="font-semibold text-[var(--text-primary)] mt-1">
                       {task.assignedTo?.name || "Unassigned"}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Created By</p>
-                    <p className="font-semibold text-gray-900 mt-1">{task.createdBy.name}</p>
+                    <p className="text-sm text-[var(--text-tertiary)] font-medium">Created By</p>
+                    <p className="font-semibold text-[var(--text-primary)] mt-1">{task.createdBy.name}</p>
                   </div>
                 </div>
 
                 {canEdit && (
                   <form onSubmit={handleUpdateTask} className="mt-6 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                           Status
                         </label>
                         <select
@@ -245,7 +304,7 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                           onChange={(e) =>
                             setUpdateForm({ ...updateForm, status: e.target.value })
                           }
-                          className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
+                          className="w-full"
                         >
                           <option value="NEW">New</option>
                           <option value="IN_PROGRESS">In Progress</option>
@@ -254,7 +313,7 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                           Priority
                         </label>
                         <select
@@ -262,7 +321,7 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                           onChange={(e) =>
                             setUpdateForm({ ...updateForm, priority: e.target.value })
                           }
-                          className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
+                          className="w-full"
                         >
                           <option value="LOW">Low</option>
                           <option value="MEDIUM">Medium</option>
@@ -274,7 +333,7 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                     <button
                       type="submit"
                       disabled={updating}
-                      className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                      className="btn btn-primary w-full"
                     >
                       {updating ? "Updating..." : "Update Task"}
                     </button>
@@ -283,26 +342,32 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
               </div>
 
               {/* Stats */}
-              <div className="space-y-4">
-                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                  <p className="text-gray-600 text-sm font-medium">Total Hours Logged</p>
-                  <p className="text-3xl font-bold text-red-600 mt-3">{totalHours.toFixed(1)}h</p>
+              <div className="col-span-3 lg:col-span-1 space-y-4">
+                <div className="panel panel-body">
+                  <p className="text-[var(--text-tertiary)] text-sm font-medium">Total Hours Logged</p>
+                  <p className="text-3xl font-bold text-[var(--primary)] mt-3">{totalHours.toFixed(1)}h</p>
                 </div>
-                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-                  <p className="text-gray-600 text-sm font-medium">Time Entries</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-3">{task.timeLogs.length}</p>
+                <div className="panel panel-body">
+                  <p className="text-[var(--text-tertiary)] text-sm font-medium">Time Entries</p>
+                  <p className="text-3xl font-bold text-[var(--text-primary)] mt-3">{task.timeLogs.length}</p>
+                </div>
+                <div className="panel panel-body">
+                  <p className="text-[var(--text-tertiary)] text-sm font-medium">Priority</p>
+                  <div className="mt-3">
+                    <span className={`badge ${priorityBadge(task.priority)}`}>{task.priority}</span>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Time Logging */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Log Time</h2>
+            <div className="panel panel-body mb-8">
+              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-6">Log Time</h2>
               <form onSubmit={handleTimeLogSubmit} className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Hours <span className="text-red-600">*</span>
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                      Hours <span className="text-[var(--primary)]">*</span>
                     </label>
                     <input
                       type="number"
@@ -314,11 +379,11 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                       }
                       required
                       placeholder="0.5"
-                      className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent placeholder-gray-500 transition-all"
+                      className="w-full"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                       Billable
                     </label>
                     <select
@@ -326,7 +391,7 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                       onChange={(e) =>
                         setTimeLogForm({ ...timeLogForm, billable: e.target.value === "true" })
                       }
-                      className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
+                      className="w-full"
                     >
                       <option value="true">Yes</option>
                       <option value="false">No</option>
@@ -336,14 +401,14 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                     <button
                       type="submit"
                       disabled={loggingTime}
-                      className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                      className="btn btn-primary w-full"
                     >
                       {loggingTime ? "Logging..." : "Log Time"}
                     </button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
                     Description
                   </label>
                   <textarea
@@ -353,31 +418,31 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                     }
                     rows={2}
                     placeholder="What did you work on?"
-                    className="w-full px-4 py-3 bg-white border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent placeholder-gray-500 transition-all resize-none"
+                    className="w-full resize-none"
                   />
                 </div>
               </form>
             </div>
 
             {/* Time Logs */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Time Entries</h2>
+            <div className="panel panel-body mb-8">
+              <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-6">Time Entries</h2>
               <div className="space-y-3">
                 {task.timeLogs.length === 0 ? (
-                  <p className="text-gray-600">No time entries yet</p>
+                  <p className="text-[var(--text-secondary)]">No time entries yet</p>
                 ) : (
                   task.timeLogs.map((log) => (
-                    <div key={log.id} className="flex justify-between items-start p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-all">
+                    <div key={log.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 p-4 bg-[var(--surface-secondary)] rounded-lg border border-[var(--border-light)] hover:border-[var(--border)] transition-all">
                       <div>
-                        <p className="font-semibold text-gray-900">{log.staff.name}</p>
-                        <p className="text-sm text-gray-600">{log.description}</p>
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="font-semibold text-[var(--text-primary)]">{log.staff.name}</p>
+                        <p className="text-sm text-[var(--text-secondary)]">{log.description}</p>
+                        <p className="text-xs text-[var(--text-tertiary)] mt-2">
                           {new Date(log.loggedAt).toLocaleString()}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-gray-900">{log.duration}h</p>
-                        <p className={`text-xs font-medium mt-1 ${log.billable ? "text-green-600" : "text-gray-600"}`}>
+                        <p className="font-semibold text-[var(--text-primary)]">{log.duration}h</p>
+                        <p className={`text-xs font-medium mt-1 ${log.billable ? "text-[var(--success)]" : "text-[var(--text-tertiary)]"}`}>
                           {log.billable ? "Billable" : "Non-billable"}
                         </p>
                       </div>
@@ -388,78 +453,37 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
             </div>
 
             {/* Activity Log */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
+            <div className="panel panel-body">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 bg-[var(--info-light)] rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-[var(--info)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">Activity Log</h2>
+                <h2 className="text-xl font-semibold text-[var(--text-primary)]">Activity Log</h2>
               </div>
 
               <div className="space-y-4">
                 {task.activityLogs.length === 0 ? (
-                  <div className="text-center py-8">
-                    <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="empty-state">
+                    <svg className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <p className="text-gray-500 font-medium">No activity yet</p>
+                    <p className="font-medium">No activity yet</p>
                   </div>
                 ) : (
                   <div className="relative">
                     {/* Timeline line */}
-                    <div className="absolute left-3 top-0 bottom-0 w-px bg-gradient-to-b from-blue-200 via-gray-200 to-gray-100"></div>
+                    <div className="absolute left-3 top-0 bottom-0 w-px bg-gradient-to-b from-[var(--info-light)] via-[var(--border-light)] to-transparent"></div>
 
                     {/* Activity items */}
                     <div className="space-y-4">
                       {task.activityLogs.map((log) => {
-                        const activityTypeConfig: Record<
-                          string,
-                          {
-                            label: string;
-                            badge: string;
-                            dot: string;
-                            border: string;
-                          }
-                        > = {
-                          TASK_CREATED: {
-                            label: "Task created",
-                            badge: "bg-green-50 text-green-700 border-green-200",
-                            dot: "bg-green-500",
-                            border: "border-green-200",
-                          },
-                          STATUS_CHANGED: {
-                            label: "Status changed",
-                            badge: "bg-blue-50 text-blue-700 border-blue-200",
-                            dot: "bg-blue-500",
-                            border: "border-blue-200",
-                          },
-                          TASK_UPDATED: {
-                            label: "Task updated",
-                            badge: "bg-amber-50 text-amber-700 border-amber-200",
-                            dot: "bg-amber-500",
-                            border: "border-amber-200",
-                          },
-                          TASK_ASSIGNED: {
-                            label: "Task assigned",
-                            badge: "bg-purple-50 text-purple-700 border-purple-200",
-                            dot: "bg-purple-500",
-                            border: "border-purple-200",
-                          },
-                          TIME_LOGGED: {
-                            label: "Time logged",
-                            badge: "bg-cyan-50 text-cyan-700 border-cyan-200",
-                            dot: "bg-cyan-500",
-                            border: "border-cyan-200",
-                          },
-                        };
-
                         const config = activityTypeConfig[log.activityType] || {
                           label: "Activity",
-                          badge: "bg-gray-50 text-gray-700 border-gray-200",
-                          dot: "bg-gray-400",
-                          border: "border-gray-200",
+                          badge: "badge badge-neutral",
+                          dot: "bg-[var(--text-muted)]",
+                          border: "border-[var(--border-light)]",
                         };
 
                         return (
@@ -469,29 +493,29 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                             />
 
                             <div
-                              className={`bg-white rounded-lg border ${config.border} shadow-sm px-5 py-4`}
+                              className={`bg-[var(--surface)] rounded-lg border ${config.border} shadow-sm px-5 py-4`}
                             >
                               <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div>
-                                  <p className="text-sm font-semibold text-gray-900">
+                                  <p className="text-sm font-semibold text-[var(--text-primary)]">
                                     {config.label}
                                   </p>
-                                  <p className="text-sm text-gray-600 mt-1">
+                                  <p className="text-sm text-[var(--text-secondary)] mt-1">
                                     {log.description}
                                   </p>
                                 </div>
                                 <span
-                                  className={`text-xs font-semibold px-3 py-1 rounded-full border ${config.badge}`}
+                                  className={`${config.badge}`}
                                 >
                                   {log.activityType.replace(/_/g, " ")}
                                 </span>
                               </div>
 
-                              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-gray-500">
-                                <span className="font-semibold text-gray-700">
+                              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-[var(--text-tertiary)]">
+                                <span className="font-semibold text-[var(--text-secondary)]">
                                   {log.user?.name || "Unknown User"}
                                 </span>
-                                <span className="h-3 w-px bg-gray-300"></span>
+                                <span className="h-3 w-px bg-[var(--border)]"></span>
                                 <time dateTime={new Date(log.createdAt).toISOString()}>
                                   {new Date(log.createdAt).toLocaleString()}
                                 </time>
