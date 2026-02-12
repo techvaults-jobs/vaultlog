@@ -81,28 +81,138 @@ async function seed() {
       // Create sample clients
       const clientsData = await db.insert(clients).values([
         {
+          name: "CustodianPLC",
+          description: "Financial custodian services and asset management",
+          status: "ACTIVE",
+        },
+        {
+          name: "SAHCO",
+          description: "Airport ground handling and cargo services",
+          status: "ACTIVE",
+        },
+        {
+          name: "ElsaTech",
+          description: "Technology solutions and cloud infrastructure",
+          status: "ACTIVE",
+        },
+        {
           name: "Acme Corp",
-          description: "Primary client - E-commerce platform",
+          description: "E-commerce platform and retail solutions",
           status: "ACTIVE",
         },
         {
           name: "TechStart Inc",
-          description: "Secondary client - SaaS application",
+          description: "SaaS application and software development",
           status: "ACTIVE",
         },
         {
           name: "Global Solutions Ltd",
-          description: "Enterprise client - Infrastructure",
+          description: "Enterprise infrastructure and consulting",
+          status: "ACTIVE",
+        },
+        {
+          name: "FinanceHub",
+          description: "Financial technology and payment processing",
+          status: "ACTIVE",
+        },
+        {
+          name: "CloudNine Systems",
+          description: "Cloud computing and data center operations",
           status: "ACTIVE",
         },
       ]).returning();
 
-      console.log("✅ Sample clients created");
+      console.log("✅ 8 clients created");
 
-      // Create sample tasks
+      // Create comprehensive sample tasks
       const sampleTasks = [
+        // CustodianPLC tasks
         {
           clientId: clientsData[0].id,
+          title: "System Security Audit and Compliance Review",
+          description: "Conduct comprehensive security audit of custodial systems, review compliance with regulatory requirements, identify vulnerabilities, and provide remediation recommendations. Include penetration testing and access control review.",
+          category: "Security",
+          priority: "URGENT",
+          status: "IN_PROGRESS",
+          assignedToId: staffUsers[0].id,
+        },
+        {
+          clientId: clientsData[0].id,
+          title: "Implement Multi-Factor Authentication",
+          description: "Deploy MFA across all user accounts and administrative interfaces to enhance security posture",
+          category: "Development",
+          priority: "HIGH",
+          status: "IN_PROGRESS",
+          assignedToId: staffUsers[1].id,
+        },
+        {
+          clientId: clientsData[0].id,
+          title: "Database Backup and Disaster Recovery Plan",
+          description: "Design and implement comprehensive backup strategy with automated recovery procedures",
+          category: "Maintenance",
+          priority: "HIGH",
+          status: "NEW",
+          assignedToId: staffUsers[2].id,
+        },
+        // SAHCO tasks
+        {
+          clientId: clientsData[1].id,
+          title: "Airport Operations Dashboard Development",
+          description: "Design and develop real-time operations dashboard for airport ground handling services. Include flight tracking, resource allocation, staff scheduling, and performance metrics. Integrate with existing airport management systems.",
+          category: "Development",
+          priority: "HIGH",
+          status: "IN_PROGRESS",
+          assignedToId: staffUsers[0].id,
+        },
+        {
+          clientId: clientsData[1].id,
+          title: "Cargo Management System Integration",
+          description: "Integrate cargo tracking system with customs and logistics partners for seamless operations",
+          category: "Development",
+          priority: "MEDIUM",
+          status: "NEW",
+          assignedToId: staffUsers[1].id,
+        },
+        {
+          clientId: clientsData[1].id,
+          title: "Staff Scheduling Optimization",
+          description: "Implement AI-based staff scheduling to optimize resource allocation and reduce operational costs",
+          category: "Feature Request",
+          priority: "MEDIUM",
+          status: "BLOCKED",
+          assignedToId: staffUsers[2].id,
+        },
+        // ElsaTech tasks
+        {
+          clientId: clientsData[2].id,
+          title: "Cloud Infrastructure Migration and Optimization",
+          description: "Plan and execute migration of on-premises infrastructure to cloud environment. Optimize resource allocation, implement auto-scaling, set up monitoring and alerting, ensure zero-downtime deployment, and provide team training on cloud operations.",
+          category: "Infrastructure",
+          priority: "HIGH",
+          status: "IN_PROGRESS",
+          assignedToId: staffUsers[0].id,
+        },
+        {
+          clientId: clientsData[2].id,
+          title: "Kubernetes Cluster Setup and Management",
+          description: "Deploy and configure production-grade Kubernetes clusters with high availability and disaster recovery",
+          category: "Infrastructure",
+          priority: "HIGH",
+          status: "IN_PROGRESS",
+          assignedToId: staffUsers[1].id,
+        },
+        {
+          clientId: clientsData[2].id,
+          title: "CI/CD Pipeline Implementation",
+          description: "Build automated deployment pipeline with testing, staging, and production environments",
+          category: "Development",
+          priority: "MEDIUM",
+          status: "NEW",
+          assignedToId: staffUsers[2].id,
+        },
+        // Acme Corp tasks
+        {
+          clientId: clientsData[3].id,
           title: "Fix login page bug",
           description: "Users are unable to login with special characters in password",
           category: "Bug Fix",
@@ -111,67 +221,116 @@ async function seed() {
           assignedToId: staffUsers[0].id,
         },
         {
-          clientId: clientsData[0].id,
+          clientId: clientsData[3].id,
           title: "Implement payment gateway",
-          description: "Integrate Stripe payment processing",
+          description: "Integrate Stripe payment processing with support for multiple currencies",
           category: "Development",
           priority: "URGENT",
           status: "IN_PROGRESS",
           assignedToId: staffUsers[1].id,
         },
         {
-          clientId: clientsData[0].id,
+          clientId: clientsData[3].id,
           title: "Database optimization",
-          description: "Optimize slow queries in user dashboard",
+          description: "Optimize slow queries in user dashboard and reporting modules",
           category: "Maintenance",
           priority: "MEDIUM",
           status: "NEW",
           assignedToId: staffUsers[2].id,
         },
+        // TechStart Inc tasks
         {
-          clientId: clientsData[1].id,
+          clientId: clientsData[4].id,
           title: "Add dark mode support",
-          description: "Implement dark mode theme for the application",
+          description: "Implement dark mode theme for the application with user preference persistence",
           category: "Feature Request",
           priority: "MEDIUM",
           status: "NEW",
           assignedToId: staffUsers[0].id,
         },
         {
-          clientId: clientsData[1].id,
+          clientId: clientsData[4].id,
           title: "API rate limiting",
-          description: "Implement rate limiting for API endpoints",
+          description: "Implement rate limiting for API endpoints to prevent abuse and ensure stability",
           category: "Development",
           priority: "HIGH",
           status: "BLOCKED",
           assignedToId: staffUsers[1].id,
         },
         {
-          clientId: clientsData[1].id,
+          clientId: clientsData[4].id,
           title: "Update documentation",
-          description: "Update API documentation for v2.0",
+          description: "Update API documentation for v2.0 with new endpoints and examples",
           category: "Support",
           priority: "LOW",
           status: "COMPLETED",
           assignedToId: staffUsers[2].id,
         },
+        // Global Solutions Ltd tasks
         {
-          clientId: clientsData[2].id,
+          clientId: clientsData[5].id,
           title: "Server migration",
-          description: "Migrate from AWS to Azure",
+          description: "Migrate from AWS to Azure with minimal downtime",
           category: "Maintenance",
           priority: "URGENT",
           status: "IN_PROGRESS",
           assignedToId: staffUsers[0].id,
         },
         {
-          clientId: clientsData[2].id,
+          clientId: clientsData[5].id,
           title: "Security audit",
-          description: "Perform comprehensive security audit",
+          description: "Perform comprehensive security audit and penetration testing",
           category: "Support",
           priority: "HIGH",
           status: "NEW",
           assignedToId: staffUsers[1].id,
+        },
+        {
+          clientId: clientsData[5].id,
+          title: "Network infrastructure upgrade",
+          description: "Upgrade network infrastructure to support increased traffic and redundancy",
+          category: "Infrastructure",
+          priority: "MEDIUM",
+          status: "NEW",
+          assignedToId: staffUsers[2].id,
+        },
+        // FinanceHub tasks
+        {
+          clientId: clientsData[6].id,
+          title: "PCI DSS Compliance Implementation",
+          description: "Implement Payment Card Industry Data Security Standard compliance across all systems",
+          category: "Security",
+          priority: "URGENT",
+          status: "IN_PROGRESS",
+          assignedToId: staffUsers[0].id,
+        },
+        {
+          clientId: clientsData[6].id,
+          title: "Real-time Transaction Monitoring",
+          description: "Develop real-time fraud detection and transaction monitoring system",
+          category: "Development",
+          priority: "HIGH",
+          status: "IN_PROGRESS",
+          assignedToId: staffUsers[1].id,
+        },
+        // CloudNine Systems tasks
+        {
+          clientId: clientsData[7].id,
+          title: "Data Center Redundancy Setup",
+          description: "Implement multi-region data center redundancy with automatic failover",
+          category: "Infrastructure",
+          priority: "HIGH",
+          status: "IN_PROGRESS",
+          assignedToId: staffUsers[2].id,
+        },
+        {
+          clientId: clientsData[7].id,
+          title: "Disaster Recovery Plan",
+          description: "Create and test comprehensive disaster recovery procedures",
+          category: "Support",
+          priority: "HIGH",
+          status: "NEW",
+          assignedToId: staffUsers[0].id,
         },
       ];
 
@@ -188,7 +347,7 @@ async function seed() {
         });
       }
 
-      console.log("✅ Sample tasks created");
+      console.log("✅ 22 sample tasks created");
     } else {
       console.log("⚠️  Clients and tasks already exist, skipping creation");
     }
@@ -205,8 +364,16 @@ async function seed() {
     console.log("  Email: alice@vaultlog.local | Password: staff123");
     console.log("  Email: bob@vaultlog.local | Password: staff123");
     console.log("  Email: carol@vaultlog.local | Password: staff123");
-    console.log("\nClients: 3 (Acme Corp, TechStart Inc, Global Solutions Ltd)");
-    console.log("Tasks: 8 (various statuses and priorities)");
+    console.log("\nClients: 8");
+    console.log("  • CustodianPLC - Financial custodian services");
+    console.log("  • SAHCO - Airport ground handling");
+    console.log("  • ElsaTech - Technology solutions");
+    console.log("  • Acme Corp - E-commerce platform");
+    console.log("  • TechStart Inc - SaaS application");
+    console.log("  • Global Solutions Ltd - Enterprise infrastructure");
+    console.log("  • FinanceHub - Financial technology");
+    console.log("  • CloudNine Systems - Cloud computing");
+    console.log("\nTasks: 22 (various statuses and priorities)");
     console.log("================");
     console.log("✅ Seed completed successfully!");
     process.exit(0);

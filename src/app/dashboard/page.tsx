@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { LoadingShell } from "@/components/LoadingShell";
+import { getSlaTargets, TaskPriority } from "@/lib/workflow";
 
 interface Task {
   id: string;
@@ -14,6 +15,7 @@ interface Task {
   priority: string;
   assignedToId: string | null;
   createdAt: Date;
+  completedAt: Date | null;
 }
 
 interface TimeLog {
@@ -76,6 +78,39 @@ export default function DashboardPage() {
     COMPLETED: tasks.filter((t) => t.status === "COMPLETED").length,
   };
 
+  const completedTasks = tasks.filter((task) => task.status === "COMPLETED" && task.completedAt);
+  const validPriorities: TaskPriority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
+  const resolvePriority = (priority: string) =>
+    validPriorities.includes(priority as TaskPriority)
+      ? (priority as TaskPriority)
+      : "MEDIUM";
+
+  const avgCycleHours = completedTasks.length
+    ? completedTasks.reduce((sum, task) => {
+        const createdAt = new Date(task.createdAt);
+        const completedAt = new Date(task.completedAt as Date);
+        return sum + (completedAt.getTime() - createdAt.getTime()) / 36e5;
+      }, 0) / completedTasks.length
+    : 0;
+
+  const cycleTimeDisplay =
+    avgCycleHours >= 24
+      ? `${(avgCycleHours / 24).toFixed(1)}d`
+      : `${avgCycleHours.toFixed(1)}h`;
+
+  const slaMetCount = completedTasks.reduce((count, task) => {
+    const createdAt = new Date(task.createdAt);
+    const completedAt = new Date(task.completedAt as Date);
+    const cycleHours = (completedAt.getTime() - createdAt.getTime()) / 36e5;
+    const targets = getSlaTargets(resolvePriority(task.priority));
+    return cycleHours <= targets.timeToComplete ? count + 1 : count;
+  }, 0);
+
+  const slaCompliance =
+    completedTasks.length > 0
+      ? Math.round((slaMetCount / completedTasks.length) * 100)
+      : 0;
+
   const todayHours = timeLogs
     .filter((log) => {
       const logDate = new Date(log.loggedAt);
@@ -127,7 +162,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
               <div className="kpi-card kpi-info card-hover">
                 <div className="flex items-center justify-between">
                   <div>
@@ -148,6 +183,54 @@ export default function DashboardPage() {
                         strokeLinejoin="round"
                         strokeWidth={2}
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="kpi-card kpi-success card-hover">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="kpi-label">SLA Compliance</p>
+                    <p className="kpi-value">{slaCompliance}%</p>
+                  </div>
+                  <div className="icon-badge success">
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="kpi-card kpi-info card-hover">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="kpi-label">Avg Cycle Time</p>
+                    <p className="kpi-value">{cycleTimeDisplay}</p>
+                  </div>
+                  <div className="icon-badge info">
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
                   </div>

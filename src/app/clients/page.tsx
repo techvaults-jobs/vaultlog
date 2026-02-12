@@ -24,6 +24,7 @@ export default function ClientsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [filter, setFilter] = useState("ALL");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -99,6 +100,23 @@ export default function ClientsPage() {
       />
     );
   }
+
+  const statusCounts = clients.reduce<Record<string, number>>((acc, client) => {
+    acc[client.status] = (acc[client.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const filterOptions = [
+    { key: "ALL", label: "All", count: clients.length },
+    { key: "ACTIVE", label: "Active", count: statusCounts.ACTIVE || 0 },
+    { key: "INACTIVE", label: "Inactive", count: statusCounts.INACTIVE || 0 },
+  ];
+
+  const filteredClients =
+    filter === "ALL" ? clients : clients.filter((client) => client.status === filter);
+
+  const statusBadge = (statusValue: string) =>
+    statusValue === "ACTIVE" ? "badge-success" : "badge-neutral";
 
   return (
     <div className="flex min-h-screen app-shell">
@@ -176,42 +194,78 @@ export default function ClientsPage() {
               </div>
             )}
 
-            {/* Clients Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {clients.map((client) => (
-                <div key={client.id} className="panel panel-body card-hover">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-[var(--text-primary)]">{client.name}</h3>
-                      <p className="text-sm text-[var(--text-secondary)] mt-1">{client.description}</p>
-                    </div>
-                    <span
-                      className={`badge ${
-                        client.status === "ACTIVE"
-                          ? "badge-success"
-                          : "badge-neutral"
-                      }`}
-                    >
-                      {client.status}
-                    </span>
-                  </div>
-                  <div className="soft-divider pt-4">
-                    <p className="text-sm text-[var(--text-secondary)]">
-                      <span className="font-semibold text-[var(--text-primary)]">{client.tasks.length}</span> tasks
-                    </p>
-                    <p className="text-sm text-[var(--text-tertiary)] mt-1">
-                      Created {new Date(client.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
+            {/* Filters */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+              {filterOptions.map((option) => (
+                <button
+                  key={option.key}
+                  onClick={() => setFilter(option.key)}
+                  className={`chip whitespace-nowrap ${filter === option.key ? "chip-active" : ""}`}
+                >
+                  <span>{option.label}</span>
+                  <span className={`text-xs ${filter === option.key ? "text-white/80" : "text-[var(--text-muted)]"}`}>
+                    {option.count}
+                  </span>
+                </button>
               ))}
             </div>
 
-            {clients.length === 0 && (
-              <div className="empty-state">
-                <p>No clients found</p>
+            {/* Clients Table */}
+            <div className="panel overflow-hidden">
+              <div className="panel-header">
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Client Directory</h2>
               </div>
-            )}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
+                        Client
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
+                        Tasks
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
+                        Created
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border-light)]">
+                    {filteredClients.map((client) => (
+                      <tr key={client.id} className="hover:bg-[var(--surface-secondary)] transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-semibold text-[var(--text-primary)]">
+                            {client.name}
+                          </div>
+                          <div className="text-sm text-[var(--text-secondary)]">
+                            {client.description || "No description"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <span className={`badge ${statusBadge(client.status)}`}>
+                            {client.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
+                          {client.tasks.length}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-[var(--text-tertiary)]">
+                          {new Date(client.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {filteredClients.length === 0 && (
+                <div className="empty-state">
+                  <p>No clients found</p>
+                </div>
+              )}
+            </div>
           </div>
         </main>
       </div>

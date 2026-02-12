@@ -1,7 +1,16 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { tasks, activityLogs } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import {
+  getAllowedTransitions,
+  getSlaTargets,
+  getWipLimit,
+  hoursBetween,
+  isTransitionAllowed,
+  TaskPriority,
+  TaskStatus,
+} from "@/lib/workflow";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -119,11 +128,55 @@ export async function PATCH(
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
+    const now = new Date();
     const updateData: Record<string, unknown> = {
-      updatedAt: new Date(),
+      updatedAt: now,
     };
 
-    if (status !== undefined) updateData.status = status;
+    if (status !== undefined && status !== currentTask.status) {
+      const fromStatus = currentTask.status as TaskStatus;
+      const toStatus = status as TaskStatus;
+
+      if (!isTransitionAllowed(fromStatus, toStatus)) {
+        return NextResponse.json(
+          {
+            error: "Invalid status transition",
+            allowedTransitions: getAllowedTransitions(fromStatus),
+          },
+          { status: 400 }
+        );
+      }
+
+      const wipLimit = getWipLimit(toStatus);
+      if (wipLimit !== undefined) {
+        const [countRow] = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(tasks)
+          .where(and(eq(tasks.status, toStatus), ne(tasks.id, id)));
+
+        const currentCount = Number(countRow?.count ?? 0);
+        if (currentCount >= wipLimit) {
+          return NextResponse.json(
+            {
+              error: "WIP limit reached for status",
+              status: toStatus,
+              limit: wipLimit,
+              current: currentCount,
+            },
+            { status: 409 }
+          );
+        }
+      }
+
+      updateData.status = toStatus;
+      if (toStatus === "COMPLETED") {
+        updateData.completedAt = now;
+      }
+      if (fromStatus === "COMPLETED" && toStatus !== "COMPLETED") {
+        updateData.completedAt = null;
+      }
+    }
+
     if (priority !== undefined) updateData.priority = priority;
     if (description !== undefined) updateData.description = description;
     if (assignedToId !== undefined) {
@@ -142,11 +195,43 @@ export async function PATCH(
 
     // Log activity for status change
     if (status && status !== currentTask.status) {
+      const createdAt = new Date(currentTask.createdAt);
+      const effectivePriority =
+        (priority ?? currentTask.priority) as TaskPriority;
+      let metadata: Record<string, unknown> | undefined;
+
+      if (status === "IN_PROGRESS") {
+        const targets = getSlaTargets(effectivePriority);
+        const actualHours = hoursBetween(createdAt, now);
+        metadata = {
+          sla: {
+            type: "time_to_start",
+            targetHours: targets.timeToStart,
+            actualHours: Number(actualHours.toFixed(2)),
+            breached: actualHours > targets.timeToStart,
+          },
+        };
+      }
+
+      if (status === "COMPLETED") {
+        const targets = getSlaTargets(effectivePriority);
+        const actualHours = hoursBetween(createdAt, now);
+        metadata = {
+          sla: {
+            type: "time_to_complete",
+            targetHours: targets.timeToComplete,
+            actualHours: Number(actualHours.toFixed(2)),
+            breached: actualHours > targets.timeToComplete,
+          },
+        };
+      }
+
       await db.insert(activityLogs).values({
         taskId: id,
         userId: session.user.id,
         activityType: "STATUS_CHANGED",
         description: `Status changed from ${currentTask.status} to ${status}`,
+        metadata: metadata ? JSON.stringify(metadata) : undefined,
       });
     }
 

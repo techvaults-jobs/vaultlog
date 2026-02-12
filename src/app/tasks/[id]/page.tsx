@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { LoadingShell } from "@/components/LoadingShell";
+import { getAllowedTransitions, TaskStatus } from "@/lib/workflow";
 
 interface Task {
   id: string;
@@ -203,6 +204,18 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
     }
   };
 
+  const statusLabels: Record<TaskStatus, string> = {
+    NEW: "New",
+    IN_PROGRESS: "In Progress",
+    BLOCKED: "Blocked",
+    COMPLETED: "Completed",
+    ARCHIVED: "Archived",
+  };
+
+  const currentStatus = task.status as TaskStatus;
+  const nextStatuses = getAllowedTransitions(currentStatus);
+  const statusOptions = [currentStatus, ...nextStatuses.filter((status) => status !== currentStatus)];
+
   const activityTypeConfig: Record<
     string,
     {
@@ -307,10 +320,13 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                           }
                           className="w-full"
                         >
-                          <option value="NEW">New</option>
-                          <option value="IN_PROGRESS">In Progress</option>
-                          <option value="BLOCKED">Blocked</option>
-                          <option value="COMPLETED">Completed</option>
+                          {statusOptions.map((statusOption) => (
+                            <option key={statusOption} value={statusOption}>
+                              {statusOption === currentStatus
+                                ? `${statusLabels[statusOption]} (Current)`
+                                : statusLabels[statusOption]}
+                            </option>
+                          ))}
                         </select>
                       </div>
                       <div>
