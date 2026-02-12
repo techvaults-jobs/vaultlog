@@ -634,8 +634,8 @@ export default function TasksPage() {
                                           {transitions.length === 0 ? "No moves" : "Move"}
                                         </option>
                                         {transitions.map((nextStatus) => {
-                                          const limit = workflow?.wipLimits?.[nextStatus];
-                                          const count = columnItems[nextStatus]?.length ?? 0;
+                                          const limit = workflow?.wipLimits?.[nextStatus as keyof typeof workflow.wipLimits];
+                                          const count = columnItems[nextStatus as keyof typeof columnItems]?.length ?? 0;
                                           const disabled =
                                             limit !== undefined && count >= limit;
                                           return (

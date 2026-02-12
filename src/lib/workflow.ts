@@ -36,7 +36,7 @@ export function isTransitionAllowed(from: TaskStatus, to: TaskStatus): boolean {
 }
 
 export function getWipLimit(status: TaskStatus): number | undefined {
-  return WORKFLOW_RULES.wipLimits[status];
+  return WORKFLOW_RULES.wipLimits[status as keyof typeof WORKFLOW_RULES.wipLimits];
 }
 
 export function getSlaTargets(priority: TaskPriority): {
