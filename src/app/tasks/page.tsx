@@ -593,9 +593,6 @@ export default function TasksPage() {
                             strategy={verticalListSortingStrategy}
                           >
                             {columnTasks.map((task) => {
-                              const transitions =
-                                workflow?.allowedTransitions?.[task.status] || [];
-
                               return (
                                 <SortableTaskCard
                                   key={task.id}
@@ -608,44 +605,12 @@ export default function TasksPage() {
                                   <div className="text-xs text-[var(--text-tertiary)] mt-1">
                                     {task.client.name}
                                   </div>
-                                  <div className="flex items-center justify-between mt-3">
+                                  <div className="flex items-center gap-2 mt-3">
                                     <span className={`badge ${priorityBadge(task.priority)}`}>
                                       {task.priority}
                                     </span>
-                                    {canEdit ? (
-                                      <select
-                                        value=""
-                                        className="text-xs rounded-md border border-[var(--border-light)] bg-[var(--surface-secondary)] px-2 py-1 text-[var(--text-secondary)]"
-                                        disabled={
-                                          updatingTaskId === task.id || transitions.length === 0
-                                        }
-                                        onChange={(event) => {
-                                          const nextStatus = event.target.value as TaskStatus;
-                                          if (nextStatus) {
-                                            handleStatusChange(
-                                              task.id,
-                                              task.status as TaskStatus,
-                                              nextStatus
-                                            );
-                                          }
-                                        }}
-                                      >
-                                        <option value="" disabled>
-                                          {transitions.length === 0 ? "No moves" : "Move"}
-                                        </option>
-                                        {transitions.map((nextStatus) => {
-                                          const limit = workflow?.wipLimits?.[nextStatus as keyof typeof workflow.wipLimits];
-                                          const count = columnItems[nextStatus as keyof typeof columnItems]?.length ?? 0;
-                                          const disabled =
-                                            limit !== undefined && count >= limit;
-                                          return (
-                                            <option key={nextStatus} value={nextStatus} disabled={disabled}>
-                                              {STATUS_LABELS[nextStatus as TaskStatus]}
-                                              {limit !== undefined ? ` (${count}/${limit})` : ""}
-                                            </option>
-                                          );
-                                        })}
-                                      </select>
+                                    {updatingTaskId === task.id ? (
+                                      <span className="text-xs text-[var(--text-tertiary)]">Updating…</span>
                                     ) : null}
                                   </div>
                                 </SortableTaskCard>
