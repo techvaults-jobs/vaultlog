@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { clients, services } from "@/db/schema";
+import { clients } from "@/db/schema";
 import { getEffectiveServicePrice } from "@/lib/pricing";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";

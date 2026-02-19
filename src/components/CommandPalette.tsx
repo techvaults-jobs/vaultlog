@@ -9,10 +9,15 @@ interface CommandItem {
   href: string;
 }
 
+const defaultItems: CommandItem[] = [
+  { id: "dashboard", label: "Go to Dashboard", href: "/dashboard" },
+  { id: "new-task", label: "Create Service Request", href: "/tasks/new" },
+  { id: "tasks", label: "View Tasks", href: "/tasks" },
+];
+
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [items, setItems] = useState<CommandItem[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -29,15 +34,8 @@ export function CommandPalette() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  useEffect(() => {
-    if (!open) return;
-    // Placeholder: in the future this can load tickets/clients/services
-    setItems([
-      { id: "dashboard", label: "Go to Dashboard", href: "/dashboard" },
-      { id: "new-task", label: "Create Service Request", href: "/tasks/new" },
-      { id: "tasks", label: "View Tasks", href: "/tasks" },
-    ]);
-  }, [open]);
+  // Placeholder: in the future this can load tickets/clients/services dynamically
+  const items = defaultItems;
 
   const filtered = items.filter((item) =>
     item.label.toLowerCase().includes(query.toLowerCase())

@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { activityLogs, contracts, tasks } from "@/db/schema";
-import { and, eq } from "drizzle-orm";
+import { activityLogs, tasks } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getEffectiveServicePrice } from "@/lib/pricing";

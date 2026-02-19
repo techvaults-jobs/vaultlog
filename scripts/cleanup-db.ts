@@ -31,8 +31,8 @@ async function cleanup() {
         console.log(`Deleting ${name}...`);
         await sql.unsafe(`DELETE FROM ${tableName}`);
         console.log(`  ✅ ${name} deleted`);
-      } catch (error: any) {
-        if (error?.code === '42P01') {
+      } catch (error: unknown) {
+        if ((error as { code?: string })?.code === '42P01') {
           console.log(`  ⚠️  ${name} table does not exist, skipping`);
         } else {
           throw error;
