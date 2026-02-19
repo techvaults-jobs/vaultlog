@@ -347,13 +347,15 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                         </select>
                       </div>
                     </div>
-                    <button
-                      type="submit"
-                      disabled={updating}
-                      className="btn btn-primary w-full"
-                    >
-                      {updating ? "Updating..." : "Update Task"}
-                    </button>
+                    <div className="form-actions">
+                      <button
+                        type="submit"
+                        disabled={updating}
+                        className="btn btn-primary"
+                      >
+                        {updating ? "Updating..." : "Update Task"}
+                      </button>
+                    </div>
                   </form>
                 )}
               </div>
@@ -418,7 +420,7 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
                     <button
                       type="submit"
                       disabled={loggingTime}
-                      className="btn btn-primary w-full"
+                      className="btn btn-primary"
                     >
                       {loggingTime ? "Logging..." : "Log Time"}
                     </button>

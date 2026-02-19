@@ -119,9 +119,9 @@ p {
   color: var(--text-secondary);
 }
 
-/* Smooth transitions */
+/* Smooth transitions - refined for professional feel */
 button, a, input, select, textarea {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Focus states - Accessibility */
@@ -172,7 +172,7 @@ input::placeholder, textarea::placeholder {
 
 input:hover, select:hover, textarea:hover {
   border-color: var(--border);
-  background-color: var(--surface-secondary);
+  background-color: var(--surface);
 }
 
 input:focus, select:focus, textarea:focus {
@@ -208,11 +208,30 @@ a {
   color: var(--primary);
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.2s ease;
 }
 
-a:hover {
+a:hover:not(.btn):not([class*="text-white"]) {
   color: var(--primary-hover);
+}
+
+/* Links in text content get underline on hover */
+p a:hover, .page-subtitle a:hover {
   text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Prevent link hover color from affecting buttons and primary-colored elements */
+a.btn:hover,
+a.btn-primary:hover,
+a.btn-secondary:hover {
+  color: inherit !important;
+}
+
+/* Ensure white text stays white on primary background hover */
+a:hover .text-white,
+a:hover span.text-white {
+  color: white !important;
 }
 
 a:focus {
@@ -254,26 +273,53 @@ a:focus {
 /* Button variants */
 .btn-primary {
   background: var(--primary);
-  color: white;
-  box-shadow: var(--shadow-md);
+  color: white !important;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--primary-hover);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-1px);
+  color: white !important;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active:not(:disabled) {
+  background: var(--primary-strong);
+  color: white !important;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary {
-  background-color: var(--surface-secondary);
-  color: var(--text-primary);
+  background-color: var(--surface);
+  color: var(--text-primary) !important;
   border: 1.5px solid var(--border-light);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .btn-secondary:hover:not(:disabled) {
+  background-color: var(--surface-secondary);
+  border-color: var(--border);
+  color: var(--text-primary) !important;
+}
+
+.btn-secondary:active:not(:disabled) {
   background-color: var(--surface-tertiary);
-  border-color: var(--primary);
-  color: var(--primary);
+  color: var(--text-primary) !important;
+}
+
+/* Form actions - content-sized buttons, 16px gap (Linear/Helios style) */
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  padding-top: 1rem;
+}
+
+.form-actions .btn {
+  width: auto;
+  min-width: 7rem;
 }
 
 /* Status badges */
@@ -344,6 +390,10 @@ td {
   color: var(--text-secondary);
 }
 
+tbody tr {
+  transition: background-color 0.15s ease;
+}
+
 tbody tr:hover {
   background-color: var(--surface-secondary);
 }
@@ -397,6 +447,11 @@ tbody tr:hover {
   border: 1px solid var(--border-light);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.panel:hover {
+  border-color: var(--border);
 }
 
 .panel-header {
@@ -410,13 +465,12 @@ tbody tr:hover {
 }
 
 .card-hover {
-  transition: all 0.25s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card-hover:hover {
   border-color: var(--border);
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
 }
 
 .chip {
@@ -430,14 +484,27 @@ tbody tr:hover {
   border: 1px solid var(--border-light);
   color: var(--text-secondary);
   background: var(--surface);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+
+.chip:hover:not(.chip-active) {
+  background-color: var(--surface-secondary);
+  border-color: var(--border);
+  color: var(--text-primary);
 }
 
 .chip-active {
   background: var(--primary);
-  color: white;
+  color: white !important;
   border-color: var(--primary);
   box-shadow: var(--shadow-sm);
+}
+
+.chip-active:hover {
+  background: var(--primary-hover);
+  color: white !important;
+  border-color: var(--primary-hover);
 }
 
 .kpi-card {

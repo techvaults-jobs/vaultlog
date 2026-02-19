@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { LoadingShell } from "@/components/LoadingShell";
@@ -159,36 +160,46 @@ export default function DashboardPage() {
                 <h1 className="page-title">Dashboard</h1>
                 <p className="page-subtitle">Welcome back, {session?.user?.name}</p>
               </div>
+              <div className="flex gap-3">
+                {["ADMIN", "MANAGER"].includes(session?.user?.role || "") && (
+                  <Link href="/tasks/new" className="btn btn-primary btn-sm">
+                    + New Request
+                  </Link>
+                )}
+                <Link href="/tasks" className="btn btn-secondary btn-sm">
+                  View Tasks
+                </Link>
+              </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {/* Primary KPIs - F-pattern: 3 cards in top row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
               <div className="kpi-card kpi-info card-hover">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="kpi-label">New Tasks</p>
-                    <p className="kpi-value">
-                      {tasksByStatus.NEW}
-                    </p>
+                    <p className="kpi-value">{tasksByStatus.NEW}</p>
                   </div>
                   <div className="icon-badge info">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                      />
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   </div>
                 </div>
               </div>
-
+              <div className="kpi-card kpi-warning card-hover">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="kpi-label">In Progress</p>
+                    <p className="kpi-value">{tasksByStatus.IN_PROGRESS}</p>
+                  </div>
+                  <div className="icon-badge warning">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
               <div className="kpi-card kpi-success card-hover">
                 <div className="flex items-center justify-between">
                   <div>
@@ -196,121 +207,37 @@ export default function DashboardPage() {
                     <p className="kpi-value">{slaCompliance}%</p>
                   </div>
                   <div className="icon-badge success">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="kpi-card kpi-info card-hover">
+            {/* Secondary KPIs */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+              <div className="kpi-card kpi-neutral card-hover">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="kpi-label">Avg Cycle Time</p>
-                    <p className="kpi-value">{cycleTimeDisplay}</p>
-                  </div>
-                  <div className="icon-badge info">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
+                    <p className="kpi-value text-xl">{cycleTimeDisplay}</p>
                   </div>
                 </div>
               </div>
-
-              <div className="kpi-card kpi-warning card-hover">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="kpi-label">In Progress</p>
-                    <p className="kpi-value">
-                      {tasksByStatus.IN_PROGRESS}
-                    </p>
-                  </div>
-                  <div className="icon-badge warning">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
               <div className="kpi-card kpi-error card-hover">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="kpi-label">Blocked</p>
-                    <p className="kpi-value">
-                      {tasksByStatus.BLOCKED}
-                    </p>
-                  </div>
-                  <div className="icon-badge error">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
+                    <p className="kpi-value">{tasksByStatus.BLOCKED}</p>
                   </div>
                 </div>
               </div>
-
               <div className="kpi-card kpi-success card-hover">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="kpi-label">Hours Today</p>
-                    <p className="kpi-value">
-                      {todayHours.toFixed(1)}h
-                    </p>
-                  </div>
-                  <div className="icon-badge success">
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
+                    <p className="kpi-value">{todayHours.toFixed(1)}h</p>
                   </div>
                 </div>
               </div>
@@ -318,8 +245,11 @@ export default function DashboardPage() {
 
             {/* Recent Tasks */}
             <div className="panel overflow-hidden">
-              <div className="panel-header">
+              <div className="panel-header flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-[var(--text-primary)]">Recent Tasks</h2>
+                <Link href="/tasks" className="text-sm font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)]">
+                  View all →
+                </Link>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -336,6 +266,9 @@ export default function DashboardPage() {
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
                         Created
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
+                        Action
                       </th>
                     </tr>
                   </thead>
@@ -361,6 +294,14 @@ export default function DashboardPage() {
                         </td>
                         <td className="px-6 py-4 text-sm text-[var(--text-tertiary)]">
                           {new Date(task.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <Link
+                            href={`/tasks/${task.id}`}
+                            className="font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)]"
+                          >
+                            View
+                          </Link>
                         </td>
                       </tr>
                     ))}

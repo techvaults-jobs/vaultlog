@@ -28,12 +28,19 @@ export default function NewTaskPage() {
 
   const [formData, setFormData] = useState({
     clientId: "",
+    supportType: "ON_DEMAND" as "ON_DEMAND" | "CONTRACT",
+    serviceId: "",
     title: "",
     description: "",
     category: "",
     priority: "MEDIUM",
     assignedToId: "",
   });
+
+  const [services, setServices] = useState<
+    { id: string; name: string; category: string }[]
+  >([]);
+  const [effectivePrice, setEffectivePrice] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -52,9 +59,10 @@ export default function NewTaskPage() {
 
   const fetchData = async () => {
     try {
-      const [clientsRes, usersRes] = await Promise.all([
+      const [clientsRes, usersRes, servicesRes] = await Promise.all([
         fetch("/api/clients"),
         fetch("/api/users"),
+        fetch("/api/services?active=true"),
       ]);
 
       if (clientsRes.ok) {
@@ -62,6 +70,9 @@ export default function NewTaskPage() {
       }
       if (usersRes.ok) {
         setUsers(await usersRes.json());
+      }
+      if (servicesRes.ok) {
+        setServices(await servicesRes.json());
       }
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -80,6 +91,29 @@ export default function NewTaskPage() {
       [name]: value,
     }));
   };
+
+  useEffect(() => {
+    const loadPricing = async () => {
+      setEffectivePrice(null);
+      if (!formData.clientId || !formData.serviceId) return;
+      try {
+        const res = await fetch(
+          `/api/clients/${formData.clientId}/pricing`
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        const match = data.pricing.find(
+          (p: { serviceId: string }) => p.serviceId === formData.serviceId
+        );
+        if (match) {
+          setEffectivePrice(match.effectivePrice);
+        }
+      } catch {
+        // silent failure – pricing is a nice-to-have on this screen
+      }
+    };
+    void loadPricing();
+  }, [formData.clientId, formData.serviceId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,8 +159,10 @@ export default function NewTaskPage() {
           <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
             <div className="page-header">
               <div>
-                <h1 className="page-title">Create New Task</h1>
-                <p className="page-subtitle">Add a new service task to the system</p>
+                <h1 className="page-title">New Service Request</h1>
+                <p className="page-subtitle">
+                  Log a one-time support task or a contract-backed ticket.
+                </p>
               </div>
             </div>
 
@@ -156,6 +192,67 @@ export default function NewTaskPage() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                    Support Type <span className="text-[var(--primary)]">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          supportType: "ON_DEMAND",
+                        }))
+                      }
+                      className={`chip w-full justify-center ${
+                        formData.supportType === "ON_DEMAND" ? "chip-active" : ""
+                      }`}
+                    >
+                      On-Demand
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          supportType: "CONTRACT",
+                        }))
+                      }
+                      className={`chip w-full justify-center ${
+                        formData.supportType === "CONTRACT" ? "chip-active" : ""
+                      }`}
+                    >
+                      Contract
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
+                    Service Type <span className="text-[var(--primary)]">*</span>
+                  </label>
+                  <select
+                    name="serviceId"
+                    value={formData.serviceId}
+                    onChange={handleChange}
+                    required
+                    className="w-full"
+                  >
+                    <option value="">Select a service</option>
+                    {services.map((service) => (
+                      <option key={service.id} value={service.id}>
+                        {service.name} · {service.category}
+                      </option>
+                    ))}
+                  </select>
+                  {effectivePrice && (
+                    <p className="text-xs text-[var(--text-tertiary)] mt-2">
+                      Estimated price: <span className="font-semibold">₦{effectivePrice}</span>
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -240,18 +337,18 @@ export default function NewTaskPage() {
                   </select>
                 </div>
 
-                <div className="flex gap-4 pt-4">
+                <div className="form-actions">
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="btn btn-primary flex-1"
+                    className="btn btn-primary"
                   >
                     {submitting ? "Creating..." : "Create Task"}
                   </button>
                   <button
                     type="button"
                     onClick={() => router.back()}
-                    className="btn btn-secondary flex-1"
+                    className="btn btn-secondary"
                   >
                     Cancel
                   </button>

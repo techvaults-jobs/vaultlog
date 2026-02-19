@@ -1,9 +1,10 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { tasks, activityLogs } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { activityLogs, contracts, tasks } from "@/db/schema";
+import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { getEffectiveServicePrice } from "@/lib/pricing";
 
 const taskStatusSchema = z.enum([
   "NEW",
@@ -28,6 +29,8 @@ const createTaskSchema = z.object({
     (value) => (value === "" ? undefined : value),
     z.string().uuid().optional().nullable()
   ),
+  serviceId: z.string().uuid(),
+  supportType: z.enum(["ON_DEMAND", "CONTRACT"]),
 });
 
 export async function GET(request: NextRequest) {
@@ -118,21 +121,68 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const { clientId, title, description, category, priority, assignedToId } =
-      parsedBody.data;
-
-    const normalizedAssignedToId =
-      assignedToId && assignedToId.length > 0 ? assignedToId : undefined;
-
-    const newTask = await db.insert(tasks).values({
+    const {
       clientId,
       title,
       description,
       category,
-      priority: priority || "MEDIUM",
-      createdById: session.user.id,
-      assignedToId: normalizedAssignedToId,
-    }).returning();
+      priority,
+      assignedToId,
+      serviceId,
+      supportType,
+    } = parsedBody.data;
+
+    const normalizedAssignedToId =
+      assignedToId && assignedToId.length > 0 ? assignedToId : undefined;
+
+    // Resolve effective pricing
+    const pricing = await getEffectiveServicePrice({
+      clientId,
+      serviceId,
+    });
+
+    // Contract validation for high-priority contract tickets
+    const isHighPriority = (priority ?? "MEDIUM") === "HIGH" ||
+      (priority ?? "MEDIUM") === "URGENT";
+
+    if (supportType === "CONTRACT" && isHighPriority) {
+      const activeContract = await db.query.contracts.findFirst({
+        where: (fields, { and, eq }) =>
+          and(
+            eq(fields.clientId, clientId),
+            eq(fields.isActive, true)
+          ),
+      });
+
+      if (!activeContract) {
+        return NextResponse.json(
+          { error: "Active support contract required for high-priority tickets." },
+          { status: 400 }
+        );
+      }
+    }
+
+    const initialStatus =
+      supportType === "ON_DEMAND" ? "NEW" : "NEW";
+
+    const newTask = await db
+      .insert(tasks)
+      .values({
+        clientId,
+        title,
+        description,
+        category,
+        priority: priority || "MEDIUM",
+        createdById: session.user.id,
+        assignedToId: normalizedAssignedToId,
+        supportType,
+        serviceId,
+        fixedPrice: pricing.effectivePrice,
+        currency: pricing.currency,
+        isHighPriority,
+        status: initialStatus,
+      })
+      .returning();
 
     // Log activity
     await db.insert(activityLogs).values({

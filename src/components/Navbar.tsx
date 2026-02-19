@@ -28,7 +28,7 @@ export function Navbar() {
               height={40}
               className="rounded-lg shadow-md group-hover:shadow-lg transition-all"
             />
-            <span className="text-lg font-bold text-[var(--text-primary)] hidden sm:inline group-hover:text-[var(--primary)] transition-colors">
+            <span className="text-lg font-bold text-[var(--text-primary)] hidden sm:inline group-hover:text-[var(--primary)] transition-colors duration-200">
               VaultLog
             </span>
           </Link>
@@ -44,7 +44,7 @@ export function Navbar() {
               height={32}
               className="rounded-lg shadow-md group-hover:shadow-lg transition-all"
             />
-            <span className="text-sm font-bold text-[var(--text-primary)] group-hover:text-[var(--primary)] transition-colors">
+            <span className="text-sm font-bold text-[var(--text-primary)] group-hover:text-[var(--primary)] transition-colors duration-200">
               VaultLog
             </span>
           </Link>

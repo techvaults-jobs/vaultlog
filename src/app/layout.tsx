@@ -1,38 +1,27 @@
 import type { Metadata } from "next";
-import { Manrope, Space_Grotesk } from "next/font/google";
+import { auth } from "@/auth";
 import "./globals.css";
+import { CommandPalette } from "@/components/CommandPalette";
 import { Providers } from "@/components/Providers";
 
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-  display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "VaultLog",
-  description: "Internal service task logging system",
-  icons: {
-    icon: "/logo-sm.png",
-  },
+  title: "Task Logger",
+  description: "Simple task logging system for development teams",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+
   return (
     <html lang="en">
-      <body className={`${manrope.variable} ${spaceGrotesk.variable} antialiased`}>
-        <Providers>
+      <body>
+        <Providers session={session}>
           {children}
+          <CommandPalette />
         </Providers>
       </body>
     </html>

@@ -133,7 +133,7 @@ export default function ClientsPage() {
               {["ADMIN", "MANAGER"].includes(session?.user?.role || "") && (
                 <button
                   onClick={() => setShowForm(!showForm)}
-                  className="btn btn-primary"
+                  className="btn btn-primary btn-sm"
                 >
                   {showForm ? "Cancel" : "+ New Client"}
                 </button>
@@ -183,13 +183,22 @@ export default function ClientsPage() {
                       className="w-full resize-none"
                     />
                   </div>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="btn btn-primary w-full"
-                  >
-                    {submitting ? "Creating..." : "Create Client"}
-                  </button>
+                  <div className="form-actions">
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="btn btn-primary"
+                    >
+                      {submitting ? "Creating..." : "Create Client"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="btn btn-secondary"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </form>
               </div>
             )}

@@ -32,6 +32,17 @@ export const activityTypeEnum = pgEnum("activity_type", [
   "STATUS_CHANGED",
 ]);
 
+// New enums for service-based support
+export const contractTypeEnum = pgEnum("contract_type", [
+  "NONE",
+  "MONTHLY",
+  "QUARTERLY",
+  "BI_ANNUAL",
+  "ANNUAL",
+]);
+
+export const supportTypeEnum = pgEnum("support_type", ["ON_DEMAND", "CONTRACT"]);
+
 // Users table
 export const users = pgTable(
   "users",
@@ -58,11 +69,86 @@ export const clients = pgTable(
     name: text("name").notNull(),
     description: text("description"),
     status: clientStatusEnum("status").notNull().default("ACTIVE"),
+    contractType: contractTypeEnum("contract_type").notNull().default("NONE"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
   (table) => ({
     statusIdx: index("clients_status_idx").on(table.status),
+  })
+);
+
+// Services table (master price list)
+export const services = pgTable(
+  "services",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    category: text("category").notNull(),
+    description: text("description"),
+    basePrice: decimal("base_price", { precision: 12, scale: 2 }).notNull(),
+    slaHours: integer("sla_hours"),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    categoryIdx: index("services_category_idx").on(table.category),
+    isActiveIdx: index("services_is_active_idx").on(table.isActive),
+  })
+);
+
+// Contracts table (support subscriptions)
+export const contracts = pgTable(
+  "contracts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    clientId: uuid("client_id")
+      .notNull()
+      .references(() => clients.id, { onDelete: "cascade" }),
+    contractType: contractTypeEnum("contract_type").notNull(),
+    supportTierName: text("support_tier_name").notNull(),
+    monthlyFee: decimal("monthly_fee", { precision: 12, scale: 2 }).notNull(),
+    startDate: timestamp("start_date").notNull(),
+    endDate: timestamp("end_date"),
+    isActive: boolean("is_active").notNull().default(true),
+    paystackPlanCode: text("paystack_plan_code"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    clientIdIdx: index("contracts_client_id_idx").on(table.clientId),
+    isActiveIdx: index("contracts_is_active_idx").on(table.isActive),
+  })
+);
+
+// Pricing overrides table (client-specific pricing rules)
+export const pricingOverrides = pgTable(
+  "pricing_overrides",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    clientId: uuid("client_id")
+      .notNull()
+      .references(() => clients.id, { onDelete: "cascade" }),
+    serviceId: uuid("service_id")
+      .notNull()
+      .references(() => services.id, { onDelete: "cascade" }),
+    discountPercentage: decimal("discount_percentage", {
+      precision: 5,
+      scale: 2,
+    }),
+    customFixedPrice: decimal("custom_fixed_price", {
+      precision: 12,
+      scale: 2,
+    }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    clientServiceIdx: index("pricing_overrides_client_service_idx").on(
+      table.clientId,
+      table.serviceId
+    ),
   })
 );
 
@@ -79,6 +165,14 @@ export const tasks = pgTable(
     category: text("category").notNull(),
     priority: priorityEnum("priority").notNull().default("MEDIUM"),
     status: taskStatusEnum("status").notNull().default("NEW"),
+    supportType: supportTypeEnum("support_type").notNull().default("ON_DEMAND"),
+    serviceId: uuid("service_id").references(() => services.id, {
+      onDelete: "set null",
+    }),
+    fixedPrice: decimal("fixed_price", { precision: 12, scale: 2 }),
+    currency: text("currency").notNull().default("NGN"),
+    milestoneProgress: integer("milestone_progress").notNull().default(0),
+    isHighPriority: boolean("is_high_priority").notNull().default(false),
     assignedToId: uuid("assigned_to_id").references(() => users.id, {
       onDelete: "set null",
     }),
@@ -93,6 +187,10 @@ export const tasks = pgTable(
     clientIdIdx: index("tasks_client_id_idx").on(table.clientId),
     statusIdx: index("tasks_status_idx").on(table.status),
     assignedToIdx: index("tasks_assigned_to_idx").on(table.assignedToId),
+    clientSupportTypeIdx: index("tasks_client_support_type_idx").on(
+      table.clientId,
+      table.supportType
+    ),
   })
 );
 
@@ -173,6 +271,8 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const clientsRelations = relations(clients, ({ many }) => ({
   tasks: many(tasks),
+  contracts: many(contracts),
+  pricingOverrides: many(pricingOverrides),
 }));
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
@@ -190,10 +290,40 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
     references: [users.id],
     relationName: "assignedTo",
   }),
+  service: one(services, {
+    fields: [tasks.serviceId],
+    references: [services.id],
+  }),
   timeLogs: many(timeLogs),
   activityLogs: many(activityLogs),
   attachments: many(attachments),
 }));
+
+export const servicesRelations = relations(services, ({ many }) => ({
+  tasks: many(tasks),
+  pricingOverrides: many(pricingOverrides),
+}));
+
+export const contractsRelations = relations(contracts, ({ one }) => ({
+  client: one(clients, {
+    fields: [contracts.clientId],
+    references: [clients.id],
+  }),
+}));
+
+export const pricingOverridesRelations = relations(
+  pricingOverrides,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [pricingOverrides.clientId],
+      references: [clients.id],
+    }),
+    service: one(services, {
+      fields: [pricingOverrides.serviceId],
+      references: [services.id],
+    }),
+  })
+);
 
 export const timeLogsRelations = relations(timeLogs, ({ one }) => ({
   task: one(tasks, {

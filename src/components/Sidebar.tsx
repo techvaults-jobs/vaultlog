@@ -35,13 +35,13 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 group ${
                   isActive
-                    ? "bg-[var(--primary)] text-white font-semibold shadow-md"
-                    : "text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)]"
+                    ? "bg-[var(--primary)] text-white font-semibold shadow-md hover:bg-[var(--primary-hover)] hover:text-white"
+                    : "text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]"
                 }`}
               >
-                <Icon size={20} className="group-hover:scale-110 transition-transform flex-shrink-0" />
+                <Icon size={20} className={`transition-opacity duration-200 flex-shrink-0 ${isActive ? "text-white" : "text-[var(--text-primary)] group-hover:opacity-80"}`} />
                 <span className={isActive ? "text-white" : "text-[var(--text-primary)]"}>{item.label}</span>
                 {isActive && <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full flex-shrink-0"></div>}
               </Link>
@@ -85,13 +85,13 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 group ${
                   isActive
-                    ? "bg-[var(--primary)] text-white font-semibold shadow-md"
-                    : "text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)]"
+                    ? "bg-[var(--primary)] text-white font-semibold shadow-md hover:bg-[var(--primary-hover)] hover:text-white"
+                    : "text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]"
                 }`}
               >
-                <Icon size={20} className="group-hover:scale-110 transition-transform flex-shrink-0" />
+                <Icon size={20} className={`transition-opacity duration-200 flex-shrink-0 ${isActive ? "text-white" : "text-[var(--text-primary)] group-hover:opacity-80"}`} />
                 <span className={isActive ? "text-white" : "text-[var(--text-primary)]"}>{item.label}</span>
                 {isActive && <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full flex-shrink-0"></div>}
               </Link>
